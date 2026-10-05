@@ -2,13 +2,14 @@ import type { Task } from '../types/task'
 
 interface TimeGridProps {
   weekStart: Date
-
+  
   onSlotClick: (
     date: Date,
     time: string,
     isSleep: boolean,
   ) => void
 
+  onTaskClick: (task: Task) => void
   tasks: Task[]
 }
 
@@ -86,6 +87,7 @@ function timeToMinutes(time: string) {
 function TimeGrid({
   weekStart,
   onSlotClick,
+  onTaskClick,
   tasks,
 }: TimeGridProps) {
   return (
@@ -204,11 +206,13 @@ function TimeGrid({
                     className="calendar-task"
                     style={{
                       top: `${top}px`,
-                      height: `${Math.max(
-                        height,
-                        18,
-                      )}px`,
+                      height: `${Math.max(height, 18)}px`,
                     }}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      onTaskClick(task)
+                    }}
+                    title="Click to edit task"
                   >
                     <strong>
                       {task.title}

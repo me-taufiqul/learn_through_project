@@ -22,64 +22,97 @@ function getMonday(date: Date) {
   const difference =
     day === 0 ? -6 : 1 - day
 
-  result.setDate(result.getDate() + difference)
+  result.setDate(
+    result.getDate() + difference,
+  )
 
   result.setHours(0, 0, 0, 0)
 
   return result
 }
 
-function addDays(date: Date, days: number) {
+function addDays(
+  date: Date,
+  days: number,
+) {
   const result = new Date(date)
 
-  result.setDate(result.getDate() + days)
+  result.setDate(
+    result.getDate() + days,
+  )
 
   return result
 }
 
-function addWeeks(date: Date, weeks: number) {
-  return addDays(date, weeks * 7)
+function addWeeks(
+  date: Date,
+  weeks: number,
+) {
+  return addDays(
+    date,
+    weeks * 7,
+  )
 }
 
-function isSameDay(date1: Date, date2: Date) {
+function isSameDay(
+  date1: Date,
+  date2: Date,
+) {
   return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
+    date1.getFullYear() ===
+      date2.getFullYear() &&
+    date1.getMonth() ===
+      date2.getMonth() &&
+    date1.getDate() ===
+      date2.getDate()
   )
 }
 
-function formatWeekTitle(weekStart: Date) {
-  const weekEnd = addDays(weekStart, 6)
+function formatWeekTitle(
+  weekStart: Date,
+) {
+  const weekEnd =
+    addDays(weekStart, 6)
 
-  const startDay = weekStart.getDate()
-  const endDay = weekEnd.getDate()
+  const startDay =
+    weekStart.getDate()
 
-  const startMonth = weekStart.toLocaleString(
-    'en-GB',
-    {
-      month: 'short',
-    },
-  )
+  const endDay =
+    weekEnd.getDate()
 
-  const endMonth = weekEnd.toLocaleString(
-    'en-GB',
-    {
-      month: 'short',
-    },
-  )
+  const startMonth =
+    weekStart.toLocaleString(
+      'en-GB',
+      {
+        month: 'short',
+      },
+    )
 
-  const startYear = weekStart.getFullYear()
-  const endYear = weekEnd.getFullYear()
+  const endMonth =
+    weekEnd.toLocaleString(
+      'en-GB',
+      {
+        month: 'short',
+      },
+    )
+
+  const startYear =
+    weekStart.getFullYear()
+
+  const endYear =
+    weekEnd.getFullYear()
 
   if (
-    weekStart.getMonth() === weekEnd.getMonth() &&
+    weekStart.getMonth() ===
+      weekEnd.getMonth() &&
     startYear === endYear
   ) {
     return `${startDay} – ${endDay} ${endMonth} ${endYear}`
   }
 
-  if (startYear === endYear) {
+  if (
+    startYear === endYear
+  ) {
     return `${startDay} ${startMonth} – ${endDay} ${endMonth} ${endYear}`
   }
 
@@ -89,131 +122,273 @@ function formatWeekTitle(weekStart: Date) {
 function getInitialWeek() {
   const today = new Date()
 
-  if (today < START_DATE) {
-    return getMonday(START_DATE)
+  if (
+    today < START_DATE
+  ) {
+    return getMonday(
+      START_DATE,
+    )
   }
 
-  if (today > END_DATE) {
-    return getMonday(END_DATE)
+  if (
+    today > END_DATE
+  ) {
+    return getMonday(
+      END_DATE,
+    )
   }
 
   return getMonday(today)
 }
 
 function WeeklyCalendar() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  console.log('TASKS:', tasks)
-  const firstWeek = getMonday(START_DATE)
-  const lastWeek = getMonday(END_DATE)
+  const [tasks, setTasks] =
+    useState<Task[]>([])
 
-  const [currentWeek, setCurrentWeek] =
-    useState<Date>(getInitialWeek)
+  const firstWeek =
+    getMonday(START_DATE)
 
-  const [selectedSlot, setSelectedSlot] =
-  useState<SelectedSlot | null>(null)
+  const lastWeek =
+    getMonday(END_DATE)
 
+  const [
+    currentWeek,
+    setCurrentWeek,
+  ] = useState<Date>(
+    getInitialWeek,
+  )
 
-  function handleCreateTask(task: Task) {
-    setTasks((currentTasks) => [
-      ...currentTasks,
-      task,
-    ])
+  const [
+    selectedSlot,
+    setSelectedSlot,
+  ] =
+    useState<SelectedSlot | null>(
+      null,
+    )
+
+  const [
+    selectedTask,
+    setSelectedTask,
+  ] =
+    useState<Task | null>(
+      null,
+    )
+
+  function handleCreateTask(
+    task: Task,
+  ) {
+    setTasks(
+      (currentTasks) => [
+        ...currentTasks,
+        task,
+      ],
+    )
   }
 
   function handleSlotClick(
-  date: Date,
-  time: string,
-  isSleep: boolean,
-) {
-  setSelectedSlot({
-    date,
-    time,
-    isSleep,
-  })
-}
+    date: Date,
+    time: string,
+    isSleep: boolean,
+  ) {
+    setSelectedTask(null)
+
+    setSelectedSlot({
+      date,
+      time,
+      isSleep,
+    })
+  }
+
+  function handleTaskClick(
+    task: Task,
+  ) {
+    setSelectedSlot(null)
+    setSelectedTask(task)
+  }
+
+  function handleUpdateTask(
+    updatedTask: Task,
+  ) {
+    setTasks(
+      (currentTasks) =>
+        currentTasks.map(
+          (task) =>
+            task.id ===
+            updatedTask.id
+              ? updatedTask
+              : task,
+        ),
+    )
+  }
+
+  function handleDeleteTask(
+    taskId: string,
+  ) {
+    setTasks(
+      (currentTasks) =>
+        currentTasks.filter(
+          (task) =>
+            task.id !== taskId,
+        ),
+    )
+  }
+
+  function closeTaskModal() {
+    setSelectedSlot(null)
+    setSelectedTask(null)
+  }
 
   function handlePreviousWeek() {
-    setCurrentWeek((previousWeek) => {
-      const newWeek = addWeeks(previousWeek, -1)
+    setCurrentWeek(
+      (previousWeek) => {
+        const newWeek =
+          addWeeks(
+            previousWeek,
+            -1,
+          )
 
-      if (newWeek < firstWeek) {
-        return previousWeek
-      }
+        if (
+          newWeek <
+          firstWeek
+        ) {
+          return previousWeek
+        }
 
-      return newWeek
-    })
+        return newWeek
+      },
+    )
   }
 
   function handleNextWeek() {
-    setCurrentWeek((previousWeek) => {
-      const newWeek = addWeeks(previousWeek, 1)
+    setCurrentWeek(
+      (previousWeek) => {
+        const newWeek =
+          addWeeks(
+            previousWeek,
+            1,
+          )
 
-      if (newWeek > lastWeek) {
-        return previousWeek
-      }
+        if (
+          newWeek >
+          lastWeek
+        ) {
+          return previousWeek
+        }
 
-      return newWeek
-    })
+        return newWeek
+      },
+    )
   }
 
   function handleToday() {
-    const today = new Date()
+    const today =
+      new Date()
 
-    if (today < START_DATE) {
-      setCurrentWeek(firstWeek)
+    if (
+      today <
+      START_DATE
+    ) {
+      setCurrentWeek(
+        firstWeek,
+      )
       return
     }
 
-    if (today > END_DATE) {
-      setCurrentWeek(lastWeek)
+    if (
+      today >
+      END_DATE
+    ) {
+      setCurrentWeek(
+        lastWeek,
+      )
       return
     }
 
-    setCurrentWeek(getMonday(today))
+    setCurrentWeek(
+      getMonday(today),
+    )
   }
 
   const previousDisabled =
-    isSameDay(currentWeek, firstWeek)
+    isSameDay(
+      currentWeek,
+      firstWeek,
+    )
 
   const nextDisabled =
-    isSameDay(currentWeek, lastWeek)
+    isSameDay(
+      currentWeek,
+      lastWeek,
+    )
 
   return (
     <main className="weekly-calendar">
       <CalendarHeader
-        weekTitle={formatWeekTitle(currentWeek)}
-        onPreviousWeek={handlePreviousWeek}
-        onNextWeek={handleNextWeek}
-        onToday={handleToday}
-        previousDisabled={previousDisabled}
-        nextDisabled={nextDisabled}
+        weekTitle={formatWeekTitle(
+          currentWeek,
+        )}
+        onPreviousWeek={
+          handlePreviousWeek
+        }
+        onNextWeek={
+          handleNextWeek
+        }
+        onToday={
+          handleToday
+        }
+        previousDisabled={
+          previousDisabled
+        }
+        nextDisabled={
+          nextDisabled
+        }
       />
-        <div style={{ padding: '6px 20px', fontSize: '12px' }}>
-          Tasks created: {tasks.length}
-        </div>
 
-        <div className="calendar-scroll-area">
+      <div className="calendar-scroll-area">
         <div className="calendar-content">
-            <div className="calendar-scroll-area">
-              <div className="calendar-content">
-                <div className="week-days-sticky">
-                  <WeekDaysHeader weekStart={currentWeek} />
-                </div>
+          <div className="week-days-sticky">
+            <WeekDaysHeader
+              weekStart={
+                currentWeek
+              }
+            />
+          </div>
 
-                <TimeGrid
-                  weekStart={currentWeek}
-                  onSlotClick={handleSlotClick}
-                  tasks={tasks}
-                />
-              </div>
-            </div>
+          <TimeGrid
+            weekStart={
+              currentWeek
+            }
+            onSlotClick={
+              handleSlotClick
+            }
+            onTaskClick={
+              handleTaskClick
+            }
+            tasks={tasks}
+          />
         </div>
-        </div>
-        <CreateTaskModal
-          selectedSlot={selectedSlot}
-          onClose={() => setSelectedSlot(null)}
-          onCreateTask={handleCreateTask}
-        />
+      </div>
+
+      <CreateTaskModal
+        selectedSlot={
+          selectedSlot
+        }
+        editingTask={
+          selectedTask
+        }
+        onClose={
+          closeTaskModal
+        }
+        onCreateTask={
+          handleCreateTask
+        }
+        onUpdateTask={
+          handleUpdateTask
+        }
+        onDeleteTask={
+          handleDeleteTask
+        }
+      />
     </main>
   )
 }
