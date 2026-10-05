@@ -1,9 +1,22 @@
-import CreateTaskModal from './CreateTaskModal'
-import type { Task } from '../types/task'
-import TimeGrid from './TimeGrid'
-import { useState } from 'react'
-import CalendarHeader from './CalendarHeader'
-import WeekDaysHeader from './WeekDaysHeader'
+import {
+  useState,
+} from 'react'
+
+import CalendarHeader
+  from './CalendarHeader'
+
+import WeekDaysHeader
+  from './WeekDaysHeader'
+
+import TimeGrid
+  from './TimeGrid'
+
+import CreateTaskModal
+  from './CreateTaskModal'
+
+import type {
+  Task,
+} from '../types/task'
 
 interface SelectedSlot {
   date: Date
@@ -11,22 +24,45 @@ interface SelectedSlot {
   isSleep: boolean
 }
 
-const START_DATE = new Date(2026, 9, 1)
-const END_DATE = new Date(2027, 2, 31)
-
-function getMonday(date: Date) {
-  const result = new Date(date)
-
-  const day = result.getDay()
-
-  const difference =
-    day === 0 ? -6 : 1 - day
-
-  result.setDate(
-    result.getDate() + difference,
+const START_DATE =
+  new Date(
+    2026,
+    9,
+    1,
   )
 
-  result.setHours(0, 0, 0, 0)
+const END_DATE =
+  new Date(
+    2027,
+    2,
+    31,
+  )
+
+function getMonday(
+  date: Date,
+) {
+  const result =
+    new Date(date)
+
+  const day =
+    result.getDay()
+
+  const difference =
+    day === 0
+      ? -6
+      : 1 - day
+
+  result.setDate(
+    result.getDate() +
+      difference,
+  )
+
+  result.setHours(
+    0,
+    0,
+    0,
+    0,
+  )
 
   return result
 }
@@ -35,10 +71,12 @@ function addDays(
   date: Date,
   days: number,
 ) {
-  const result = new Date(date)
+  const result =
+    new Date(date)
 
   result.setDate(
-    result.getDate() + days,
+    result.getDate() +
+      days,
   )
 
   return result
@@ -68,11 +106,58 @@ function isSameDay(
   )
 }
 
+function formatDateKey(
+  date: Date,
+) {
+  const year =
+    date.getFullYear()
+
+  const month =
+    String(
+      date.getMonth() + 1,
+    ).padStart(
+      2,
+      '0',
+    )
+
+  const day =
+    String(
+      date.getDate(),
+    ).padStart(
+      2,
+      '0',
+    )
+
+  return `${year}-${month}-${day}`
+}
+
+function parseDateKey(
+  dateKey: string,
+) {
+  const [
+    year,
+    month,
+    day,
+  ] =
+    dateKey
+      .split('-')
+      .map(Number)
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+  )
+}
+
 function formatWeekTitle(
   weekStart: Date,
 ) {
   const weekEnd =
-    addDays(weekStart, 6)
+    addDays(
+      weekStart,
+      6,
+    )
 
   const startDay =
     weekStart.getDate()
@@ -111,7 +196,8 @@ function formatWeekTitle(
   }
 
   if (
-    startYear === endYear
+    startYear ===
+    endYear
   ) {
     return `${startDay} ${startMonth} – ${endDay} ${endMonth} ${endYear}`
   }
@@ -120,10 +206,12 @@ function formatWeekTitle(
 }
 
 function getInitialWeek() {
-  const today = new Date()
+  const today =
+    new Date()
 
   if (
-    today < START_DATE
+    today <
+    START_DATE
   ) {
     return getMonday(
       START_DATE,
@@ -131,56 +219,140 @@ function getInitialWeek() {
   }
 
   if (
-    today > END_DATE
+    today >
+    END_DATE
   ) {
     return getMonday(
       END_DATE,
     )
   }
 
-  return getMonday(today)
+  return getMonday(
+    today,
+  )
 }
 
 function WeeklyCalendar() {
-  const [tasks, setTasks] =
+  const [
+    tasks,
+    setTasks,
+  ] =
     useState<Task[]>([])
-
-  const firstWeek =
-    getMonday(START_DATE)
-
-  const lastWeek =
-    getMonday(END_DATE)
 
   const [
     currentWeek,
     setCurrentWeek,
-  ] = useState<Date>(
-    getInitialWeek,
-  )
+  ] =
+    useState<Date>(
+      getInitialWeek,
+    )
 
   const [
     selectedSlot,
     setSelectedSlot,
   ] =
-    useState<SelectedSlot | null>(
-      null,
-    )
+    useState<
+      SelectedSlot | null
+    >(null)
 
   const [
     selectedTask,
     setSelectedTask,
   ] =
-    useState<Task | null>(
-      null,
+    useState<
+      Task | null
+    >(null)
+
+  const firstWeek =
+    getMonday(
+      START_DATE,
+    )
+
+  const lastWeek =
+    getMonday(
+      END_DATE,
     )
 
   function handleCreateTask(
     task: Task,
   ) {
+    if (
+      task.recurrence !==
+        'daily' ||
+      !task.recurrenceEndDate
+    ) {
+      setTasks(
+        (
+          currentTasks,
+        ) => [
+          ...currentTasks,
+          task,
+        ],
+      )
+
+      return
+    }
+
+    const startDate =
+      parseDateKey(
+        task.date,
+      )
+
+    const requestedEndDate =
+      parseDateKey(
+        task.recurrenceEndDate,
+      )
+
+    const finalEndDate =
+      requestedEndDate >
+      END_DATE
+        ? END_DATE
+        : requestedEndDate
+
+    const groupId =
+      task.recurrenceGroupId ??
+      crypto.randomUUID()
+
+    const recurringTasks:
+      Task[] = []
+
+    let currentDate =
+      new Date(
+        startDate,
+      )
+
+    while (
+      currentDate <=
+      finalEndDate
+    ) {
+      recurringTasks.push({
+        ...task,
+
+        id:
+          crypto.randomUUID(),
+
+        date:
+          formatDateKey(
+            currentDate,
+          ),
+
+        recurrenceGroupId:
+          groupId,
+      })
+
+      currentDate =
+        addDays(
+          currentDate,
+          1,
+        )
+    }
+
     setTasks(
-      (currentTasks) => [
+      (
+        currentTasks,
+      ) => [
         ...currentTasks,
-        task,
+        ...recurringTasks,
       ],
     )
   }
@@ -190,7 +362,9 @@ function WeeklyCalendar() {
     time: string,
     isSleep: boolean,
   ) {
-    setSelectedTask(null)
+    setSelectedTask(
+      null,
+    )
 
     setSelectedSlot({
       date,
@@ -202,22 +376,39 @@ function WeeklyCalendar() {
   function handleTaskClick(
     task: Task,
   ) {
-    setSelectedSlot(null)
-    setSelectedTask(task)
+    setSelectedSlot(
+      null,
+    )
+
+    setSelectedTask(
+      task,
+    )
   }
 
   function handleUpdateTask(
     updatedTask: Task,
   ) {
     setTasks(
-      (currentTasks) =>
+      (
+        currentTasks,
+      ) =>
         currentTasks.map(
-          (task) =>
+          (
+            task,
+          ) =>
             task.id ===
             updatedTask.id
               ? updatedTask
               : task,
         ),
+    )
+
+    setSelectedTask(
+      null,
+    )
+
+    setSelectedSlot(
+      null,
     )
   }
 
@@ -225,22 +416,42 @@ function WeeklyCalendar() {
     taskId: string,
   ) {
     setTasks(
-      (currentTasks) =>
+      (
+        currentTasks,
+      ) =>
         currentTasks.filter(
-          (task) =>
-            task.id !== taskId,
+          (
+            task,
+          ) =>
+            task.id !==
+            taskId,
         ),
+    )
+
+    setSelectedTask(
+      null,
+    )
+
+    setSelectedSlot(
+      null,
     )
   }
 
   function closeTaskModal() {
-    setSelectedSlot(null)
-    setSelectedTask(null)
+    setSelectedSlot(
+      null,
+    )
+
+    setSelectedTask(
+      null,
+    )
   }
 
   function handlePreviousWeek() {
     setCurrentWeek(
-      (previousWeek) => {
+      (
+        previousWeek,
+      ) => {
         const newWeek =
           addWeeks(
             previousWeek,
@@ -261,7 +472,9 @@ function WeeklyCalendar() {
 
   function handleNextWeek() {
     setCurrentWeek(
-      (previousWeek) => {
+      (
+        previousWeek,
+      ) => {
         const newWeek =
           addWeeks(
             previousWeek,
@@ -291,6 +504,7 @@ function WeeklyCalendar() {
       setCurrentWeek(
         firstWeek,
       )
+
       return
     }
 
@@ -301,11 +515,14 @@ function WeeklyCalendar() {
       setCurrentWeek(
         lastWeek,
       )
+
       return
     }
 
     setCurrentWeek(
-      getMonday(today),
+      getMonday(
+        today,
+      ),
     )
   }
 
@@ -324,9 +541,11 @@ function WeeklyCalendar() {
   return (
     <main className="weekly-calendar">
       <CalendarHeader
-        weekTitle={formatWeekTitle(
-          currentWeek,
-        )}
+        weekTitle={
+          formatWeekTitle(
+            currentWeek,
+          )
+        }
         onPreviousWeek={
           handlePreviousWeek
         }
@@ -364,7 +583,9 @@ function WeeklyCalendar() {
             onTaskClick={
               handleTaskClick
             }
-            tasks={tasks}
+            tasks={
+              tasks
+            }
           />
         </div>
       </div>

@@ -84,6 +84,12 @@ function timeToMinutes(time: string) {
   return hour * 60 + minute
 }
 
+function getCategoryClass(category: string) {
+  return `category-${category
+    .toLowerCase()
+    .replace(/\s+/g, '-')}`
+}
+
 function TimeGrid({
   weekStart,
   onSlotClick,
@@ -203,7 +209,9 @@ function TimeGrid({
                 return (
                   <div
                     key={task.id}
-                    className="calendar-task"
+                    className={`calendar-task ${getCategoryClass(
+                      task.category,
+                    )}`}
                     style={{
                       top: `${top}px`,
                       height: `${Math.max(height, 18)}px`,

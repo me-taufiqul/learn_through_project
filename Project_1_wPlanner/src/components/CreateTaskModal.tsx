@@ -1,5 +1,13 @@
-import { useEffect, useState } from 'react'
-import type { Task } from '../types/task'
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from 'react'
+
+import type {
+  Task,
+  RecurrenceType,
+} from '../types/task'
 
 interface SelectedSlot {
   date: Date
@@ -9,11 +17,22 @@ interface SelectedSlot {
 
 interface CreateTaskModalProps {
   selectedSlot: SelectedSlot | null
+
   editingTask: Task | null
+
   onClose: () => void
-  onCreateTask: (task: Task) => void
-  onUpdateTask: (task: Task) => void
-  onDeleteTask: (taskId: string) => void
+
+  onCreateTask: (
+    task: Task,
+  ) => void
+
+  onUpdateTask: (
+    task: Task,
+  ) => void
+
+  onDeleteTask: (
+    taskId: string,
+  ) => void
 }
 
 const categories = [
@@ -26,21 +45,36 @@ const categories = [
   'Other',
 ]
 
-function formatDateKey(date: Date) {
-  const year = date.getFullYear()
-  const month = String(
-    date.getMonth() + 1,
-  ).padStart(2, '0')
-  const day = String(
-    date.getDate(),
-  ).padStart(2, '0')
+function formatDateKey(
+  date: Date,
+) {
+  const year =
+    date.getFullYear()
+
+  const month =
+    String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')
+
+  const day =
+    String(
+      date.getDate(),
+    ).padStart(2, '0')
 
   return `${year}-${month}-${day}`
 }
 
-function parseDateKey(dateKey: string) {
-  const [year, month, day] =
-    dateKey.split('-').map(Number)
+function parseDateKey(
+  dateKey: string,
+) {
+  const [
+    year,
+    month,
+    day,
+  ] =
+    dateKey
+      .split('-')
+      .map(Number)
 
   return new Date(
     year,
@@ -49,7 +83,9 @@ function parseDateKey(dateKey: string) {
   )
 }
 
-function formatDate(date: Date) {
+function formatDate(
+  date: Date,
+) {
   return date.toLocaleDateString(
     'en-GB',
     {
@@ -61,35 +97,63 @@ function formatDate(date: Date) {
   )
 }
 
-function timeToMinutes(time: string) {
-  if (time === '24:00') {
+function timeToMinutes(
+  time: string,
+) {
+  if (
+    time === '24:00'
+  ) {
     return 1440
   }
 
-  const [hour, minute] =
-    time.split(':').map(Number)
+  const [
+    hour,
+    minute,
+  ] =
+    time
+      .split(':')
+      .map(Number)
 
-  return hour * 60 + minute
+  return (
+    hour * 60 +
+    minute
+  )
 }
 
-function isSleepTime(time: string) {
-  return timeToMinutes(time) < 7 * 60
+function isSleepTime(
+  time: string,
+) {
+  return (
+    timeToMinutes(time) <
+    7 * 60
+  )
 }
 
 function createStartTimeOptions() {
   return Array.from(
-    { length: 96 },
+    {
+      length: 96,
+    },
     (_, index) => {
-      const minutes = index * 15
-      const hour = Math.floor(
-        minutes / 60,
-      )
-      const minute = minutes % 60
+      const minutes =
+        index * 15
 
-      return `${String(hour).padStart(
+      const hour =
+        Math.floor(
+          minutes / 60,
+        )
+
+      const minute =
+        minutes % 60
+
+      return `${String(
+        hour,
+      ).padStart(
         2,
         '0',
-      )}:${String(minute).padStart(
+      )}:${String(
+        minute,
+      ).padStart(
         2,
         '0',
       )}`
@@ -101,31 +165,48 @@ function createEndTimeOptions(
   startTime: string,
 ) {
   const startMinutes =
-    timeToMinutes(startTime)
+    timeToMinutes(
+      startTime,
+    )
 
-  const options: string[] = []
+  const options:
+    string[] = []
 
   for (
-    let minutes = startMinutes + 15;
+    let minutes =
+      startMinutes + 15;
+
     minutes <= 1440;
+
     minutes += 15
   ) {
-    if (minutes === 1440) {
-      options.push('24:00')
+    if (
+      minutes === 1440
+    ) {
+      options.push(
+        '24:00',
+      )
+
       break
     }
 
     const hour =
-      Math.floor(minutes / 60)
+      Math.floor(
+        minutes / 60,
+      )
 
     const minute =
       minutes % 60
 
     options.push(
-      `${String(hour).padStart(
+      `${String(
+        hour,
+      ).padStart(
         2,
         '0',
-      )}:${String(minute).padStart(
+      )}:${String(
+        minute,
+      ).padStart(
         2,
         '0',
       )}`,
@@ -146,64 +227,143 @@ function CreateTaskModal({
   onUpdateTask,
   onDeleteTask,
 }: CreateTaskModalProps) {
-  const [title, setTitle] =
+  const [
+    title,
+    setTitle,
+  ] =
     useState('')
 
-  const [category, setCategory] =
+  const [
+    category,
+    setCategory,
+  ] =
     useState('Study')
 
-  const [description, setDescription] =
+  const [
+    description,
+    setDescription,
+  ] =
     useState('')
 
-  const [startTime, setStartTime] =
+  const [
+    startTime,
+    setStartTime,
+  ] =
     useState('')
 
-  const [endTime, setEndTime] =
+  const [
+    endTime,
+    setEndTime,
+  ] =
     useState('')
 
   const [
     overrideSleep,
     setOverrideSleep,
-  ] = useState(false)
+  ] =
+    useState(false)
+
+  const [
+    recurrence,
+    setRecurrence,
+  ] =
+    useState<RecurrenceType>(
+      'none',
+    )
+
+  const [
+    recurrenceEndDate,
+    setRecurrenceEndDate,
+  ] =
+    useState('')
 
   useEffect(() => {
-    if (editingTask) {
-      setTitle(editingTask.title)
-      setCategory(editingTask.category)
+    if (
+      editingTask
+    ) {
+      setTitle(
+        editingTask.title,
+      )
+
+      setCategory(
+        editingTask.category,
+      )
+
       setDescription(
         editingTask.description,
       )
+
       setStartTime(
         editingTask.startTime,
       )
-      setEndTime(editingTask.endTime)
+
+      setEndTime(
+        editingTask.endTime,
+      )
+
       setOverrideSleep(
         editingTask.overrideSleep,
+      )
+
+      setRecurrence(
+        editingTask.recurrence ??
+          'none',
+      )
+
+      setRecurrenceEndDate(
+        editingTask
+          .recurrenceEndDate ??
+          '',
       )
 
       return
     }
 
-    if (selectedSlot) {
+    if (
+      selectedSlot
+    ) {
       const options =
         createEndTimeOptions(
           selectedSlot.time,
         )
 
       setTitle('')
-      setCategory('Study')
+
+      setCategory(
+        'Study',
+      )
+
       setDescription('')
+
       setStartTime(
         selectedSlot.time,
       )
+
       setEndTime(
         options[0] ?? '',
       )
-      setOverrideSleep(false)
-    }
-  }, [selectedSlot, editingTask])
 
-  if (!selectedSlot && !editingTask) {
+      setOverrideSleep(
+        false,
+      )
+
+      setRecurrence(
+        'none',
+      )
+
+      setRecurrenceEndDate(
+        '',
+      )
+    }
+  }, [
+    selectedSlot,
+    editingTask,
+  ])
+
+  if (
+    !selectedSlot &&
+    !editingTask
+  ) {
     return null
   }
 
@@ -217,16 +377,28 @@ function CreateTaskModal({
         )
       : selectedSlot!.date
 
+  const currentDateKey =
+    editingTask?.date ??
+    formatDateKey(
+      selectedSlot!.date,
+    )
+
   const sleepBlocked =
-    isSleepTime(startTime)
+    isSleepTime(
+      startTime,
+    )
 
   const endTimeOptions =
-    createEndTimeOptions(startTime)
+    createEndTimeOptions(
+      startTime,
+    )
 
   function handleStartChange(
     newStartTime: string,
   ) {
-    setStartTime(newStartTime)
+    setStartTime(
+      newStartTime,
+    )
 
     const options =
       createEndTimeOptions(
@@ -242,16 +414,20 @@ function CreateTaskModal({
         newStartTime,
       )
     ) {
-      setOverrideSleep(false)
+      setOverrideSleep(
+        false,
+      )
     }
   }
 
   function handleSubmit(
-    event: React.FormEvent,
+    event: FormEvent,
   ) {
     event.preventDefault()
 
-    if (!title.trim()) {
+    if (
+      !title.trim()
+    ) {
       return
     }
 
@@ -262,12 +438,30 @@ function CreateTaskModal({
       return
     }
 
+    if (
+      recurrence !==
+        'none' &&
+      !recurrenceEndDate
+    ) {
+      return
+    }
+
+    if (
+      recurrence !==
+        'none' &&
+      recurrenceEndDate <
+        currentDateKey
+    ) {
+      return
+    }
+
     const task: Task = {
       id:
         editingTask?.id ??
         crypto.randomUUID(),
 
-      title: title.trim(),
+      title:
+        title.trim(),
 
       description:
         description.trim(),
@@ -275,27 +469,52 @@ function CreateTaskModal({
       category,
 
       date:
-        editingTask?.date ??
-        formatDateKey(
-          selectedSlot!.date,
-        ),
+        currentDateKey,
 
       startTime,
+
       endTime,
+
       overrideSleep,
+
+      recurrence,
+
+      recurrenceEndDate:
+        recurrence ===
+        'none'
+          ? undefined
+          : recurrenceEndDate,
+
+      recurrenceGroupId:
+        editingTask
+          ?.recurrenceGroupId ??
+        (
+          recurrence !==
+          'none'
+            ? crypto.randomUUID()
+            : undefined
+        ),
     }
 
-    if (isEditing) {
-      onUpdateTask(task)
+    if (
+      isEditing
+    ) {
+      onUpdateTask(
+        task,
+      )
     } else {
-      onCreateTask(task)
+      onCreateTask(
+        task,
+      )
     }
 
     onClose()
   }
 
   function handleDelete() {
-    if (!editingTask) {
+    if (
+      !editingTask
+    ) {
       return
     }
 
@@ -304,7 +523,9 @@ function CreateTaskModal({
         `Delete "${editingTask.title}"?`,
       )
 
-    if (!confirmed) {
+    if (
+      !confirmed
+    ) {
       return
     }
 
@@ -318,11 +539,15 @@ function CreateTaskModal({
   return (
     <div
       className="modal-backdrop"
-      onMouseDown={onClose}
+      onMouseDown={
+        onClose
+      }
     >
       <div
         className="task-modal"
-        onMouseDown={(event) =>
+        onMouseDown={(
+          event,
+        ) =>
           event.stopPropagation()
         }
       >
@@ -344,13 +569,20 @@ function CreateTaskModal({
           <button
             type="button"
             className="modal-close-button"
-            onClick={onClose}
+            onClick={
+              onClose
+            }
+            aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={
+            handleSubmit
+          }
+        >
           <div className="selected-slot-info">
             <strong>
               {formatDate(
@@ -366,8 +598,9 @@ function CreateTaskModal({
               </strong>
 
               <p>
-                This time is normally
-                reserved for sleep.
+                This time is
+                normally reserved
+                for sleep.
               </p>
 
               <label className="override-row">
@@ -376,15 +609,19 @@ function CreateTaskModal({
                   checked={
                     overrideSleep
                   }
-                  onChange={(event) =>
+                  onChange={(
+                    event,
+                  ) =>
                     setOverrideSleep(
-                      event.target
+                      event
+                        .target
                         .checked,
                     )
                   }
                 />
 
-                Override sleep time
+                Override sleep
+                time
               </label>
             </div>
           )}
@@ -397,10 +634,16 @@ function CreateTaskModal({
             <input
               id="task-title"
               type="text"
-              value={title}
-              onChange={(event) =>
+              value={
+                title
+              }
+              onChange={(
+                event,
+              ) =>
                 setTitle(
-                  event.target.value,
+                  event
+                    .target
+                    .value,
                 )
               }
               required
@@ -416,20 +659,34 @@ function CreateTaskModal({
 
               {isEditing ? (
                 <select
-                  value={startTime}
-                  onChange={(event) =>
+                  value={
+                    startTime
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     handleStartChange(
-                      event.target.value,
+                      event
+                        .target
+                        .value,
                     )
                   }
                 >
                   {startTimeOptions.map(
-                    (time) => (
+                    (
+                      time,
+                    ) => (
                       <option
-                        key={time}
-                        value={time}
+                        key={
+                          time
+                        }
+                        value={
+                          time
+                        }
                       >
-                        {time}
+                        {
+                          time
+                        }
                       </option>
                     ),
                   )}
@@ -437,7 +694,9 @@ function CreateTaskModal({
               ) : (
                 <input
                   type="text"
-                  value={startTime}
+                  value={
+                    startTime
+                  }
                   readOnly
                 />
               )}
@@ -449,20 +708,34 @@ function CreateTaskModal({
               </label>
 
               <select
-                value={endTime}
-                onChange={(event) =>
+                value={
+                  endTime
+                }
+                onChange={(
+                  event,
+                ) =>
                   setEndTime(
-                    event.target.value,
+                    event
+                      .target
+                      .value,
                   )
                 }
               >
                 {endTimeOptions.map(
-                  (time) => (
+                  (
+                    time,
+                  ) => (
                     <option
-                      key={time}
-                      value={time}
+                      key={
+                        time
+                      }
+                      value={
+                        time
+                      }
                     >
-                      {time}
+                      {
+                        time
+                      }
                     </option>
                   ),
                 )}
@@ -476,20 +749,34 @@ function CreateTaskModal({
             </label>
 
             <select
-              value={category}
-              onChange={(event) =>
+              value={
+                category
+              }
+              onChange={(
+                event,
+              ) =>
                 setCategory(
-                  event.target.value,
+                  event
+                    .target
+                    .value,
                 )
               }
             >
               {categories.map(
-                (item) => (
+                (
+                  item,
+                ) => (
                   <option
-                    key={item}
-                    value={item}
+                    key={
+                      item
+                    }
+                    value={
+                      item
+                    }
                   >
-                    {item}
+                    {
+                      item
+                    }
                   </option>
                 ),
               )}
@@ -497,15 +784,94 @@ function CreateTaskModal({
           </div>
 
           <div className="form-field">
+            <label htmlFor="recurrence">
+              Repeat
+            </label>
+
+            <select
+              id="recurrence"
+              value={
+                recurrence
+              }
+              onChange={(
+                event,
+              ) => {
+                const value =
+                  event
+                    .target
+                    .value as RecurrenceType
+
+                setRecurrence(
+                  value,
+                )
+
+                if (
+                  value ===
+                  'none'
+                ) {
+                  setRecurrenceEndDate(
+                    '',
+                  )
+                }
+              }}
+            >
+              <option value="none">
+                Does not repeat
+              </option>
+
+              <option value="daily">
+                Daily
+              </option>
+            </select>
+          </div>
+
+          {recurrence ===
+            'daily' && (
+            <div className="form-field">
+              <label htmlFor="recurrence-end">
+                Repeat until
+              </label>
+
+              <input
+                id="recurrence-end"
+                type="date"
+                value={
+                  recurrenceEndDate
+                }
+                min={
+                  currentDateKey
+                }
+                max="2027-03-31"
+                onChange={(
+                  event,
+                ) =>
+                  setRecurrenceEndDate(
+                    event
+                      .target
+                      .value,
+                  )
+                }
+                required
+              />
+            </div>
+          )}
+
+          <div className="form-field">
             <label>
               Description
             </label>
 
             <textarea
-              value={description}
-              onChange={(event) =>
+              value={
+                description
+              }
+              onChange={(
+                event,
+              ) =>
                 setDescription(
-                  event.target.value,
+                  event
+                    .target
+                    .value,
                 )
               }
               rows={3}
@@ -528,7 +894,9 @@ function CreateTaskModal({
             <button
               type="button"
               className="secondary-button"
-              onClick={onClose}
+              onClick={
+                onClose
+              }
             >
               Cancel
             </button>
@@ -537,8 +905,15 @@ function CreateTaskModal({
               type="submit"
               className="primary-button"
               disabled={
-                sleepBlocked &&
-                !overrideSleep
+                (
+                  sleepBlocked &&
+                  !overrideSleep
+                ) ||
+                (
+                  recurrence !==
+                    'none' &&
+                  !recurrenceEndDate
+                )
               }
             >
               {isEditing
