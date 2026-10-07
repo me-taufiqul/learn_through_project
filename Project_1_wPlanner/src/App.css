@@ -886,8 +886,9 @@
   .secondary-button,
   .danger-button {
     min-height: 44px;
+    touch-action: manipulation;
   }
-}
+
 
 /* =================================
    STEP 20 - MOBILE OPTIMIZATION
