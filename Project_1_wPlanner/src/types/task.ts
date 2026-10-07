@@ -5,6 +5,7 @@ export type RecurrenceType =
 
 export interface Task {
   id: string
+
   title: string
   description: string
   category: string
@@ -21,4 +22,6 @@ export interface Task {
   recurrenceEndDate?: string
 
   recurrenceGroupId?: string
+
+  isPriority: boolean
 }

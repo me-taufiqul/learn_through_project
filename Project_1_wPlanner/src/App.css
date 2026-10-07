@@ -667,90 +667,613 @@
   cursor: pointer;
 }
 
-@media (max-width: 700px) {
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
   .app {
+    width: 100%;
+    height: 100vh;
+
     padding: 0;
+
+    overflow: hidden;
   }
 
   .weekly-calendar {
+    width: 100%;
     height: 100vh;
 
     border: none;
     border-radius: 0;
+
+    overflow: hidden;
   }
 
   .calendar-header {
-    min-height: 72px;
+    min-height: 68px;
 
-    padding: 10px 12px;
+    padding: 8px 10px;
 
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .week-label {
+    font-size: 9px;
+  }
+
+  .week-info h2 {
+    margin-top: 2px;
+
+    font-size: 16px;
+
+    white-space: nowrap;
+  }
+
+  .calendar-navigation {
+    gap: 4px;
+  }
+
+  .nav-button,
+  .today-button {
+    height: 36px;
+
+    border-radius: 7px;
+  }
+
+  .nav-button {
+    width: 36px;
+
+    font-size: 20px;
+  }
+
+  .today-button {
+    padding: 0 10px;
+
+    font-size: 12px;
+  }
+
+  .calendar-scroll-area {
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: auto;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
+  }
+
+  .calendar-content {
+    min-width: 820px;
+  }
+
+  .week-days-sticky {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 50;
+
+    background: white;
+  }
+
+  .time-header {
+    position: sticky;
+
+    left: 0;
+
+    z-index: 60;
+
+    background: white;
+  }
+
+  .time-label-column {
+    position: sticky;
+
+    left: 0;
+
+    z-index: 40;
+
+    background: white;
+  }
+
+  .day-header {
+    min-height: 62px;
+  }
+
+  .day-name {
+    font-size: 9px;
+  }
+
+  .day-date {
+    width: 30px;
+    height: 30px;
+
+    font-size: 15px;
+  }
+
+  .time-label {
+    font-size: 9px;
+  }
+
+  .calendar-task {
+    left: 3px;
+    right: 3px;
+
+    padding: 3px 4px;
+
+    font-size: 10px;
+
+    border-radius: 5px;
+  }
+
+  .calendar-task span {
+    font-size: 9px;
+  }
+
+  .priority-task {
+    left: 17px;
+    right: 3px;
+  }
+
+  .secondary-conflict-task {
+    left: 3px;
+    right: 17px;
   }
 
   .task-modal {
-    padding: 18px;
+    width: calc(100% - 16px);
+
+    max-height: calc(100vh - 16px);
+
+    padding: 16px;
+
+    border-radius: 12px;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+  }
+
+  .task-modal-header {
+    margin-bottom: 14px;
+  }
+
+  .task-modal-header h2 {
+    font-size: 20px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-field {
+    margin-bottom: 12px;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    min-height: 44px;
+
+    font-size: 16px;
+  }
+
+  .form-field textarea {
+    min-height: 80px;
+  }
+
+  .modal-actions {
+    position: sticky;
+
+    bottom: -16px;
+
+    padding-top: 10px;
+    padding-bottom: 16px;
+
+    background: white;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button {
+    min-height: 44px;
+  }
+}
+
+/* =================================
+   STEP 20 - MOBILE OPTIMIZATION
+   ================================= */
+
+@media (max-width: 700px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .app {
+    width: 100%;
+    height: 100vh;
+
+    padding: 0;
+
+    overflow: hidden;
+  }
+
+  .weekly-calendar {
+    width: 100%;
+    height: 100vh;
+
+    border: none;
+    border-radius: 0;
+
+    overflow: hidden;
+  }
+
+  /* ---------- TOP HEADER ---------- */
+
+  .calendar-header {
+    min-height: 68px;
+
+    padding: 8px 10px;
+
+    gap: 8px;
+
+    flex-shrink: 0;
   }
 
   .week-label {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .week-info h2 {
-    font-size: 18px;
+    margin-top: 2px;
+
+    font-size: 16px;
+
+    white-space: nowrap;
   }
 
   .calendar-navigation {
-    gap: 5px;
+    gap: 4px;
+
+    flex-shrink: 0;
   }
 
   .nav-button,
   .today-button {
     height: 38px;
+
+    border-radius: 7px;
+
+    touch-action: manipulation;
   }
 
   .nav-button {
     width: 38px;
+
+    font-size: 20px;
   }
 
   .today-button {
-    padding: 0 12px;
-    font-size: 13px;
+    padding: 0 10px;
+
+    font-size: 12px;
   }
 
-  .calendar-content {
-    min-width: 840px;
-  }
+  /* ---------- CALENDAR SCROLLING ---------- */
 
-  .day-header {
-    min-height: 66px;
-  }
-
-  .day-name {
-    font-size: 10px;
-  }
-
-  .day-date {
-    width: 32px;
-    height: 32px;
-
-    font-size: 16px;
-  }
   .calendar-scroll-area {
+    flex: 1;
+
     width: 100%;
 
-    flex: 1;
     min-height: 0;
 
     overflow: auto;
 
     position: relative;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
   }
-    .calendar-content {
-    min-width: 900px;
+
+  /*
+    Intentionally wider than the phone.
+    Users move through the week horizontally.
+  */
+
+  .calendar-content {
+    min-width: 820px;
+
     position: relative;
   }
+
+  /* ---------- STICKY DAYS ---------- */
+
+  .week-days-sticky {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 50;
+
+    background: white;
+  }
+
+  .time-header {
+    position: sticky;
+
+    left: 0;
+
+    z-index: 70;
+
+    background: white;
+  }
+
+  .time-label-column {
+    position: sticky;
+
+    left: 0;
+
+    z-index: 40;
+
+    background: white;
+  }
+
+  /* ---------- DAY HEADERS ---------- */
+
+  .day-header {
+    min-height: 62px;
+  }
+
+  .day-name {
+    font-size: 9px;
+  }
+
+  .day-date {
+    width: 30px;
+    height: 30px;
+
+    font-size: 15px;
+  }
+
+  /* ---------- TIME GRID ---------- */
+
+  .time-label {
+    font-size: 9px;
+  }
+
+  .time-slot {
+    touch-action: manipulation;
+  }
+
+  /* ---------- TASKS ---------- */
+
+  .calendar-task {
+    left: 3px;
+    right: 3px;
+
+    padding: 3px 4px;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+
+    touch-action: manipulation;
+  }
+
+  .calendar-task span {
+    font-size: 9px;
+  }
+
+  .priority-task {
+    left: 17px;
+    right: 3px;
+  }
+
+  .secondary-conflict-task {
+    left: 3px;
+    right: 17px;
+  }
+
+  .conflict-badge,
+  .priority-badge {
+    font-size: 8px;
+  }
+
+  /* ---------- MODAL ---------- */
+
+  .modal-backdrop {
+    padding: 8px;
+
+    align-items: center;
+  }
+
+  .task-modal {
+    width: calc(100% - 4px);
+
+    max-height: calc(100vh - 16px);
+
+    padding: 16px;
+
+    border-radius: 12px;
+
+    overflow-y: auto;
+  }
+
+  .task-modal-header {
+    margin-bottom: 14px;
+  }
+
+  .task-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .modal-close-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ---------- FORMS ---------- */
+
+  .form-row {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .form-field {
+    margin-bottom: 12px;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    min-height: 44px;
+
+    font-size: 16px;
+  }
+
+  .form-field textarea {
+    min-height: 80px;
+  }
+
+  .override-row input,
+  .priority-option input {
+    min-height: auto;
+  }
+
+  /* ---------- MODAL BUTTONS ---------- */
+
+  .modal-actions {
+    position: sticky;
+
+    bottom: -16px;
+
+    z-index: 10;
+
+    padding-top: 10px;
+    padding-bottom: 16px;
+
+    background: white;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button {
+    min-height: 44px;
+
+    touch-action: manipulation;
+  }
+}
+
+/* ================================
+   STEP 17 - CONFLICT + PRIORITY
+   ================================ */
+
+.conflicting-task {
+  outline: 2px solid #ef4444;
+  outline-offset: -2px;
+}
+
+.secondary-conflict-task {
+  left: 4px;
+  right: 22px;
+
+  opacity: 0.82;
+
+  z-index: 18;
+}
+
+.priority-task {
+  left: 22px;
+  right: 4px;
+
+  outline: 3px solid #f59e0b;
+  outline-offset: -3px;
+
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.18);
+
+  opacity: 1;
+
+  z-index: 30;
+}
+
+.conflict-badge {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  line-height: 1.1;
+
+  color: #b91c1c;
+
+  letter-spacing: 0.04em;
+}
+
+.priority-badge {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  line-height: 1.1;
+
+  color: #92400e;
+
+  letter-spacing: 0.05em;
+}
+
+.priority-option {
+  margin-bottom: 16px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+
+  background: #fffbeb;
+}
+
+.priority-option label {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #92400e;
+
+  cursor: pointer;
+}
+
+.priority-option p {
+  margin:
+    7px 0 0;
+
+  font-size: 12px;
+
+  color: #78716c;
 }

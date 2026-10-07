@@ -9,6 +9,10 @@ import type {
   RecurrenceType,
 } from '../types/task'
 
+export type RecurringEditScope =
+  | 'single'
+  | 'series'
+
 interface SelectedSlot {
   date: Date
   time: string
@@ -17,8 +21,8 @@ interface SelectedSlot {
 
 interface CreateTaskModalProps {
   selectedSlot: SelectedSlot | null
-
   editingTask: Task | null
+  editingTaskHasConflict: boolean
 
   onClose: () => void
 
@@ -28,10 +32,12 @@ interface CreateTaskModalProps {
 
   onUpdateTask: (
     task: Task,
+    scope: RecurringEditScope,
   ) => void
 
   onDeleteTask: (
-    taskId: string,
+    task: Task,
+    scope: RecurringEditScope,
   ) => void
 }
 
@@ -100,9 +106,7 @@ function formatDate(
 function timeToMinutes(
   time: string,
 ) {
-  if (
-    time === '24:00'
-  ) {
+  if (time === '24:00') {
     return 1440
   }
 
@@ -131,9 +135,7 @@ function isSleepTime(
 
 function createStartTimeOptions() {
   return Array.from(
-    {
-      length: 96,
-    },
+    { length: 96 },
     (_, index) => {
       const minutes =
         index * 15
@@ -175,9 +177,7 @@ function createEndTimeOptions(
   for (
     let minutes =
       startMinutes + 15;
-
     minutes <= 1440;
-
     minutes += 15
   ) {
     if (
@@ -222,6 +222,7 @@ const startTimeOptions =
 function CreateTaskModal({
   selectedSlot,
   editingTask,
+  editingTaskHasConflict,
   onClose,
   onCreateTask,
   onUpdateTask,
@@ -230,38 +231,32 @@ function CreateTaskModal({
   const [
     title,
     setTitle,
-  ] =
-    useState('')
+  ] = useState('')
 
   const [
     category,
     setCategory,
-  ] =
-    useState('Study')
+  ] = useState('Study')
 
   const [
     description,
     setDescription,
-  ] =
-    useState('')
+  ] = useState('')
 
   const [
     startTime,
     setStartTime,
-  ] =
-    useState('')
+  ] = useState('')
 
   const [
     endTime,
     setEndTime,
-  ] =
-    useState('')
+  ] = useState('')
 
   const [
     overrideSleep,
     setOverrideSleep,
-  ] =
-    useState(false)
+  ] = useState(false)
 
   const [
     recurrence,
@@ -274,13 +269,23 @@ function CreateTaskModal({
   const [
     recurrenceEndDate,
     setRecurrenceEndDate,
+  ] = useState('')
+
+  const [
+    isPriority,
+    setIsPriority,
+  ] = useState(false)
+
+  const [
+    editScope,
+    setEditScope,
   ] =
-    useState('')
+    useState<RecurringEditScope>(
+      'single',
+    )
 
   useEffect(() => {
-    if (
-      editingTask
-    ) {
+    if (editingTask) {
       setTitle(
         editingTask.title,
       )
@@ -306,8 +311,7 @@ function CreateTaskModal({
       )
 
       setRecurrence(
-        editingTask.recurrence ??
-          'none',
+        editingTask.recurrence,
       )
 
       setRecurrenceEndDate(
@@ -316,23 +320,26 @@ function CreateTaskModal({
           '',
       )
 
+      setIsPriority(
+        editingTask.isPriority ??
+          false,
+      )
+
+      setEditScope(
+        'single',
+      )
+
       return
     }
 
-    if (
-      selectedSlot
-    ) {
+    if (selectedSlot) {
       const options =
         createEndTimeOptions(
           selectedSlot.time,
         )
 
       setTitle('')
-
-      setCategory(
-        'Study',
-      )
-
+      setCategory('Study')
       setDescription('')
 
       setStartTime(
@@ -343,16 +350,16 @@ function CreateTaskModal({
         options[0] ?? '',
       )
 
-      setOverrideSleep(
-        false,
-      )
+      setOverrideSleep(false)
 
-      setRecurrence(
-        'none',
-      )
+      setRecurrence('none')
 
-      setRecurrenceEndDate(
-        '',
+      setRecurrenceEndDate('')
+
+      setIsPriority(false)
+
+      setEditScope(
+        'single',
       )
     }
   }, [
@@ -369,6 +376,12 @@ function CreateTaskModal({
 
   const isEditing =
     editingTask !== null
+
+  const isRecurringTask =
+    Boolean(
+      editingTask
+        ?.recurrenceGroupId,
+    )
 
   const currentDate =
     editingTask
@@ -425,9 +438,7 @@ function CreateTaskModal({
   ) {
     event.preventDefault()
 
-    if (
-      !title.trim()
-    ) {
+    if (!title.trim()) {
       return
     }
 
@@ -439,18 +450,10 @@ function CreateTaskModal({
     }
 
     if (
+      !isEditing &&
       recurrence !==
         'none' &&
       !recurrenceEndDate
-    ) {
-      return
-    }
-
-    if (
-      recurrence !==
-        'none' &&
-      recurrenceEndDate <
-        currentDateKey
     ) {
       return
     }
@@ -494,13 +497,16 @@ function CreateTaskModal({
             ? crypto.randomUUID()
             : undefined
         ),
+
+      isPriority,
     }
 
-    if (
-      isEditing
-    ) {
+    if (isEditing) {
       onUpdateTask(
         task,
+        isRecurringTask
+          ? editScope
+          : 'single',
       )
     } else {
       onCreateTask(
@@ -512,25 +518,30 @@ function CreateTaskModal({
   }
 
   function handleDelete() {
-    if (
-      !editingTask
-    ) {
+    if (!editingTask) {
       return
     }
 
+    const deletingSeries =
+      isRecurringTask &&
+      editScope === 'series'
+
     const confirmed =
       window.confirm(
-        `Delete "${editingTask.title}"?`,
+        deletingSeries
+          ? `Delete the entire "${editingTask.title}" series?`
+          : `Delete "${editingTask.title}"?`,
       )
 
-    if (
-      !confirmed
-    ) {
+    if (!confirmed) {
       return
     }
 
     onDeleteTask(
-      editingTask.id,
+      editingTask,
+      deletingSeries
+        ? 'series'
+        : 'single',
     )
 
     onClose()
@@ -591,6 +602,56 @@ function CreateTaskModal({
             </strong>
           </div>
 
+          {isEditing &&
+            isRecurringTask && (
+              <div className="priority-option">
+                <strong>
+                  Recurring task
+                </strong>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="edit-scope"
+                    checked={
+                      editScope ===
+                      'single'
+                    }
+                    onChange={() =>
+                      setEditScope(
+                        'single',
+                      )
+                    }
+                  />
+
+                  <span>
+                    This occurrence
+                    only
+                  </span>
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="edit-scope"
+                    checked={
+                      editScope ===
+                      'series'
+                    }
+                    onChange={() =>
+                      setEditScope(
+                        'series',
+                      )
+                    }
+                  />
+
+                  <span>
+                    Entire series
+                  </span>
+                </label>
+              </div>
+            )}
+
           {sleepBlocked && (
             <div className="sleep-warning">
               <strong>
@@ -613,26 +674,23 @@ function CreateTaskModal({
                     event,
                   ) =>
                     setOverrideSleep(
-                      event
-                        .target
+                      event.target
                         .checked,
                     )
                   }
                 />
 
-                Override sleep
-                time
+                Override sleep time
               </label>
             </div>
           )}
 
           <div className="form-field">
-            <label htmlFor="task-title">
+            <label>
               Task title
             </label>
 
             <input
-              id="task-title"
               type="text"
               value={
                 title
@@ -641,8 +699,7 @@ function CreateTaskModal({
                 event,
               ) =>
                 setTitle(
-                  event
-                    .target
+                  event.target
                     .value,
                 )
               }
@@ -657,49 +714,30 @@ function CreateTaskModal({
                 Start
               </label>
 
-              {isEditing ? (
-                <select
-                  value={
-                    startTime
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    handleStartChange(
-                      event
-                        .target
-                        .value,
-                    )
-                  }
-                >
-                  {startTimeOptions.map(
-                    (
-                      time,
-                    ) => (
-                      <option
-                        key={
-                          time
-                        }
-                        value={
-                          time
-                        }
-                      >
-                        {
-                          time
-                        }
-                      </option>
-                    ),
-                  )}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  value={
-                    startTime
-                  }
-                  readOnly
-                />
-              )}
+              <select
+                value={
+                  startTime
+                }
+                onChange={(
+                  event,
+                ) =>
+                  handleStartChange(
+                    event.target
+                      .value,
+                  )
+                }
+              >
+                {startTimeOptions.map(
+                  (time) => (
+                    <option
+                      key={time}
+                      value={time}
+                    >
+                      {time}
+                    </option>
+                  ),
+                )}
+              </select>
             </div>
 
             <div className="form-field">
@@ -715,27 +753,18 @@ function CreateTaskModal({
                   event,
                 ) =>
                   setEndTime(
-                    event
-                      .target
+                    event.target
                       .value,
                   )
                 }
               >
                 {endTimeOptions.map(
-                  (
-                    time,
-                  ) => (
+                  (time) => (
                     <option
-                      key={
-                        time
-                      }
-                      value={
-                        time
-                      }
+                      key={time}
+                      value={time}
                     >
-                      {
-                        time
-                      }
+                      {time}
                     </option>
                   ),
                 )}
@@ -756,105 +785,132 @@ function CreateTaskModal({
                 event,
               ) =>
                 setCategory(
-                  event
-                    .target
+                  event.target
                     .value,
                 )
               }
             >
               {categories.map(
-                (
-                  item,
-                ) => (
+                (item) => (
                   <option
-                    key={
-                      item
-                    }
-                    value={
-                      item
-                    }
+                    key={item}
+                    value={item}
                   >
-                    {
-                      item
-                    }
+                    {item}
                   </option>
                 ),
               )}
             </select>
           </div>
 
-          <div className="form-field">
-            <label htmlFor="recurrence">
-              Repeat
-            </label>
+          {!isEditing && (
+            <>
+              <div className="form-field">
+                <label>
+                  Repeat
+                </label>
 
-            <select
-              id="recurrence"
-              value={
-                recurrence
-              }
-              onChange={(
-                event,
-              ) => {
-                const value =
-                  event
-                    .target
-                    .value as RecurrenceType
+                <select
+                  value={
+                    recurrence
+                  }
+                  onChange={(
+                    event,
+                  ) => {
+                    const value =
+                      event.target
+                        .value as RecurrenceType
 
-                setRecurrence(
-                  value,
-                )
+                    setRecurrence(
+                      value,
+                    )
 
-                if (
-                  value ===
-                  'none'
-                ) {
-                  setRecurrenceEndDate(
-                    '',
-                  )
-                }
-              }}
-            >
-              <option value="none">
-                Does not repeat
-              </option>
+                    if (
+                      value ===
+                      'none'
+                    ) {
+                      setRecurrenceEndDate(
+                        '',
+                      )
+                    }
+                  }}
+                >
+                  <option value="none">
+                    Does not repeat
+                  </option>
 
-              <option value="daily">
-                Daily
-              </option>
-            </select>
-          </div>
+                  <option value="daily">
+                    Daily
+                  </option>
 
-          {recurrence ===
-            'daily' && (
-            <div className="form-field">
-              <label htmlFor="recurrence-end">
-                Repeat until
-              </label>
+                  <option value="weekly">
+                    Weekly
+                  </option>
+                </select>
+              </div>
 
-              <input
-                id="recurrence-end"
-                type="date"
-                value={
-                  recurrenceEndDate
-                }
-                min={
-                  currentDateKey
-                }
-                max="2027-03-31"
-                onChange={(
-                  event,
-                ) =>
-                  setRecurrenceEndDate(
-                    event
-                      .target
-                      .value,
-                  )
-                }
-                required
-              />
-            </div>
+              {recurrence !==
+                'none' && (
+                  <div className="form-field">
+                    <label>
+                      Repeat until
+                    </label>
+
+                    <input
+                      type="date"
+                      value={
+                        recurrenceEndDate
+                      }
+                      min={
+                        currentDateKey
+                      }
+                      max="2027-03-31"
+                      onChange={(
+                        event,
+                      ) =>
+                        setRecurrenceEndDate(
+                          event.target
+                            .value,
+                        )
+                      }
+                      required
+                    />
+                  </div>
+                )}
+            </>
           )}
+
+          {isEditing &&
+            editingTaskHasConflict &&
+            (
+              !isRecurringTask ||
+              editScope ===
+                'single'
+            ) && (
+              <div className="priority-option">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={
+                      isPriority
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      setIsPriority(
+                        event.target
+                          .checked,
+                      )
+                    }
+                  />
+
+                  <span>
+                    Make this the
+                    priority task
+                  </span>
+                </label>
+              </div>
+            )}
 
           <div className="form-field">
             <label>
@@ -869,8 +925,7 @@ function CreateTaskModal({
                 event,
               ) =>
                 setDescription(
-                  event
-                    .target
+                  event.target
                     .value,
                 )
               }
@@ -887,7 +942,11 @@ function CreateTaskModal({
                   handleDelete
                 }
               >
-                Delete
+                {isRecurringTask &&
+                editScope ===
+                  'series'
+                  ? 'Delete Series'
+                  : 'Delete'}
               </button>
             )}
 
@@ -905,19 +964,16 @@ function CreateTaskModal({
               type="submit"
               className="primary-button"
               disabled={
-                (
-                  sleepBlocked &&
-                  !overrideSleep
-                ) ||
-                (
-                  recurrence !==
-                    'none' &&
-                  !recurrenceEndDate
-                )
+                sleepBlocked &&
+                !overrideSleep
               }
             >
               {isEditing
-                ? 'Save Changes'
+                ? isRecurringTask &&
+                  editScope ===
+                    'series'
+                  ? 'Save Series'
+                  : 'Save Changes'
                 : 'Create Task'}
             </button>
           </div>

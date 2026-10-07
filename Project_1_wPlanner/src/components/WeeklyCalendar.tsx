@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
 } from 'react'
 
@@ -11,12 +12,21 @@ import WeekDaysHeader
 import TimeGrid
   from './TimeGrid'
 
-import CreateTaskModal
-  from './CreateTaskModal'
+import CreateTaskModal, {
+  type RecurringEditScope,
+} from './CreateTaskModal'
 
 import type {
   Task,
 } from '../types/task'
+
+import {
+  tasksOverlap,
+  taskHasConflict,
+} from '../utils/conflicts'
+
+import db
+  from '../database'
 
 interface SelectedSlot {
   date: Date
@@ -115,18 +125,12 @@ function formatDateKey(
   const month =
     String(
       date.getMonth() + 1,
-    ).padStart(
-      2,
-      '0',
-    )
+    ).padStart(2, '0')
 
   const day =
     String(
       date.getDate(),
-    ).padStart(
-      2,
-      '0',
-    )
+    ).padStart(2, '0')
 
   return `${year}-${month}-${day}`
 }
@@ -190,7 +194,8 @@ function formatWeekTitle(
   if (
     weekStart.getMonth() ===
       weekEnd.getMonth() &&
-    startYear === endYear
+    startYear ===
+      endYear
   ) {
     return `${startDay} – ${endDay} ${endMonth} ${endYear}`
   }
@@ -240,6 +245,12 @@ function WeeklyCalendar() {
     useState<Task[]>([])
 
   const [
+    databaseLoaded,
+    setDatabaseLoaded,
+  ] =
+    useState(false)
+
+  const [
     currentWeek,
     setCurrentWeek,
   ] =
@@ -273,24 +284,97 @@ function WeeklyCalendar() {
       END_DATE,
     )
 
-  function handleCreateTask(
+  /*
+   * Load tasks from IndexedDB.
+   */
+  useEffect(() => {
+    async function loadTasks() {
+      try {
+        const savedTasks =
+          await db.tasks.toArray()
+
+        setTasks(
+          savedTasks,
+        )
+      } catch (
+        error
+      ) {
+        console.error(
+          'Could not load tasks:',
+          error,
+        )
+      } finally {
+        setDatabaseLoaded(
+          true,
+        )
+      }
+    }
+
+    loadTasks()
+  }, [])
+
+  /*
+   * Save tasks whenever
+   * the task list changes.
+   */
+  useEffect(() => {
+    if (
+      !databaseLoaded
+    ) {
+      return
+    }
+
+    async function saveTasks() {
+      try {
+        await db.transaction(
+          'rw',
+          db.tasks,
+          async () => {
+            await db.tasks.clear()
+
+            if (
+              tasks.length >
+              0
+            ) {
+              await db.tasks.bulkPut(
+                tasks,
+              )
+            }
+          },
+        )
+      } catch (
+        error
+      ) {
+        console.error(
+          'Could not save tasks:',
+          error,
+        )
+      }
+    }
+
+    saveTasks()
+  }, [
+    tasks,
+    databaseLoaded,
+  ])
+
+  function createOccurrences(
     task: Task,
   ) {
     if (
-      task.recurrence !==
-        'daily' ||
+      task.recurrence ===
+        'none' ||
       !task.recurrenceEndDate
     ) {
-      setTasks(
-        (
-          currentTasks,
-        ) => [
-          ...currentTasks,
-          task,
-        ],
-      )
+      return [
+        {
+          ...task,
 
-      return
+          isPriority:
+            task.isPriority ??
+            false,
+        },
+      ]
     }
 
     const startDate =
@@ -321,6 +405,12 @@ function WeeklyCalendar() {
         startDate,
       )
 
+    const intervalDays =
+      task.recurrence ===
+      'weekly'
+        ? 7
+        : 1
+
     while (
       currentDate <=
       finalEndDate
@@ -338,22 +428,149 @@ function WeeklyCalendar() {
 
         recurrenceGroupId:
           groupId,
+
+        isPriority:
+          false,
       })
 
       currentDate =
         addDays(
           currentDate,
-          1,
+          intervalDays,
         )
     }
+
+    return recurringTasks
+  }
+
+  function handleCreateTask(
+    task: Task,
+  ) {
+    const newTasks =
+      createOccurrences(
+        task,
+      )
+
+    const conflictingNewTasks =
+      newTasks.filter(
+        (
+          newTask,
+        ) =>
+          tasks.some(
+            (
+              existingTask,
+            ) =>
+              tasksOverlap(
+                newTask,
+                existingTask,
+              ),
+          ),
+      )
+
+    if (
+      conflictingNewTasks.length ===
+      0
+    ) {
+      setTasks(
+        (
+          currentTasks,
+        ) => [
+          ...currentTasks,
+          ...newTasks,
+        ],
+      )
+
+      return
+    }
+
+    const confirmed =
+      window.confirm(
+        `Conflict detected.\n\n${conflictingNewTasks.length} new task occurrence(s) overlap with an existing task.\n\nCreate anyway?`,
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    const makePriority =
+      window.confirm(
+        'Do you want the new conflicting task to be the PRIORITY task?\n\nOK = Make new task priority\nCancel = Keep existing priority.',
+      )
+
+    const preparedTasks =
+      newTasks.map(
+        (
+          newTask,
+        ) => {
+          const hasConflict =
+            tasks.some(
+              (
+                existingTask,
+              ) =>
+                tasksOverlap(
+                  newTask,
+                  existingTask,
+                ),
+            )
+
+          return {
+            ...newTask,
+
+            isPriority:
+              makePriority &&
+              hasConflict,
+          }
+        },
+      )
 
     setTasks(
       (
         currentTasks,
-      ) => [
-        ...currentTasks,
-        ...recurringTasks,
-      ],
+      ) => {
+        let updatedExisting =
+          currentTasks
+
+        if (
+          makePriority
+        ) {
+          updatedExisting =
+            currentTasks.map(
+              (
+                existingTask,
+              ) => {
+                const overlapsPriorityTask =
+                  preparedTasks.some(
+                    (
+                      newTask,
+                    ) =>
+                      newTask.isPriority &&
+                      tasksOverlap(
+                        newTask,
+                        existingTask,
+                      ),
+                  )
+
+                if (
+                  overlapsPriorityTask
+                ) {
+                  return {
+                    ...existingTask,
+
+                    isPriority:
+                      false,
+                  }
+                }
+
+                return existingTask
+              },
+            )
+        }
+
+        return [
+          ...updatedExisting,
+          ...preparedTasks,
+        ]
+      },
     )
   }
 
@@ -387,19 +604,230 @@ function WeeklyCalendar() {
 
   function handleUpdateTask(
     updatedTask: Task,
+    scope:
+      RecurringEditScope,
   ) {
+    /*
+     * Update the entire
+     * recurring series.
+     */
+    if (
+      scope === 'series' &&
+      updatedTask
+        .recurrenceGroupId
+    ) {
+      const groupId =
+        updatedTask
+          .recurrenceGroupId
+
+      const candidateSeries =
+        tasks
+          .filter(
+            (task) =>
+              task.recurrenceGroupId ===
+              groupId,
+          )
+          .map(
+            (task) => ({
+              ...task,
+
+              title:
+                updatedTask.title,
+
+              description:
+                updatedTask.description,
+
+              category:
+                updatedTask.category,
+
+              startTime:
+                updatedTask.startTime,
+
+              endTime:
+                updatedTask.endTime,
+
+              overrideSleep:
+                updatedTask.overrideSleep,
+            }),
+          )
+
+      const outsideTasks =
+        tasks.filter(
+          (task) =>
+            task.recurrenceGroupId !==
+            groupId,
+        )
+
+      const conflictCount =
+        candidateSeries.filter(
+          (
+            candidate,
+          ) =>
+            outsideTasks.some(
+              (
+                otherTask,
+              ) =>
+                tasksOverlap(
+                  candidate,
+                  otherTask,
+                ),
+            ),
+        ).length
+
+      if (
+        conflictCount > 0
+      ) {
+        const confirmed =
+          window.confirm(
+            `${conflictCount} occurrence(s) in this series will conflict with another task.\n\nSave the series anyway?`,
+          )
+
+        if (!confirmed) {
+          return
+        }
+      }
+
+      setTasks(
+        (
+          currentTasks,
+        ) =>
+          currentTasks.map(
+            (task) => {
+              if (
+                task.recurrenceGroupId !==
+                groupId
+              ) {
+                return task
+              }
+
+              const updatedOccurrence = {
+                ...task,
+
+                title:
+                  updatedTask.title,
+
+                description:
+                  updatedTask.description,
+
+                category:
+                  updatedTask.category,
+
+                startTime:
+                  updatedTask.startTime,
+
+                endTime:
+                  updatedTask.endTime,
+
+                overrideSleep:
+                  updatedTask.overrideSleep,
+              }
+
+              const stillConflicts =
+                outsideTasks.some(
+                  (
+                    otherTask,
+                  ) =>
+                    tasksOverlap(
+                      updatedOccurrence,
+                      otherTask,
+                    ),
+                )
+
+              return {
+                ...updatedOccurrence,
+
+                isPriority:
+                  stillConflicts
+                    ? task.isPriority
+                    : false,
+              }
+            },
+          ),
+      )
+
+      setSelectedTask(
+        null,
+      )
+
+      setSelectedSlot(
+        null,
+      )
+
+      return
+    }
+
+    /*
+     * Update one occurrence
+     * or one normal task.
+     */
+    const conflicts =
+      tasks.filter(
+        (task) =>
+          task.id !==
+            updatedTask.id &&
+          tasksOverlap(
+            updatedTask,
+            task,
+          ),
+      )
+
+    if (
+      conflicts.length >
+      0
+    ) {
+      const confirmed =
+        window.confirm(
+          `This task overlaps with ${conflicts.length} other task(s).\n\nSave changes anyway?`,
+        )
+
+      if (!confirmed) {
+        return
+      }
+    }
+
+    const taskToSave:
+      Task = {
+      ...updatedTask,
+
+      isPriority:
+        conflicts.length >
+        0
+          ? updatedTask
+              .isPriority
+          : false,
+    }
+
     setTasks(
       (
         currentTasks,
       ) =>
         currentTasks.map(
-          (
-            task,
-          ) =>
-            task.id ===
-            updatedTask.id
-              ? updatedTask
-              : task,
+          (task) => {
+            if (
+              task.id ===
+              taskToSave.id
+            ) {
+              return taskToSave
+            }
+
+            if (
+              taskToSave
+                .isPriority &&
+              tasksOverlap(
+                taskToSave,
+                task,
+              )
+            ) {
+              return {
+                ...task,
+
+                isPriority:
+                  false,
+              }
+            }
+
+            return task
+          },
         ),
     )
 
@@ -413,19 +841,34 @@ function WeeklyCalendar() {
   }
 
   function handleDeleteTask(
-    taskId: string,
+    taskToDelete: Task,
+    scope:
+      RecurringEditScope,
   ) {
     setTasks(
       (
         currentTasks,
-      ) =>
-        currentTasks.filter(
-          (
-            task,
-          ) =>
+      ) => {
+        if (
+          scope ===
+            'series' &&
+          taskToDelete
+            .recurrenceGroupId
+        ) {
+          return currentTasks.filter(
+            (task) =>
+              task.recurrenceGroupId !==
+              taskToDelete
+                .recurrenceGroupId,
+          )
+        }
+
+        return currentTasks.filter(
+          (task) =>
             task.id !==
-            taskId,
-        ),
+            taskToDelete.id,
+        )
+      },
     )
 
     setSelectedTask(
@@ -538,6 +981,14 @@ function WeeklyCalendar() {
       lastWeek,
     )
 
+  const editingTaskHasConflict =
+    selectedTask
+      ? taskHasConflict(
+          selectedTask,
+          tasks,
+        )
+      : false
+
   return (
     <main className="weekly-calendar">
       <CalendarHeader
@@ -596,6 +1047,9 @@ function WeeklyCalendar() {
         }
         editingTask={
           selectedTask
+        }
+        editingTaskHasConflict={
+          editingTaskHasConflict
         }
         onClose={
           closeTaskModal
