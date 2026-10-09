@@ -1,78 +1,87 @@
-# React + TypeScript + Vite
+# wPlanner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<p align="center">
+  <strong>A simple, local-first weekly planner for Web and Android.</strong>
+</p>
 
-Currently, two official plugins are available:
+<p align="center">
+  Plan your week in 15-minute intervals, manage recurring tasks, detect schedule conflicts, and decide what takes priority.
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## About wPlanner
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**wPlanner** is a lightweight weekly scheduling application designed for people who want a clear view of their week without accounts, dashboards, subscriptions, or unnecessary complexity.
 
-## Expanding the ESLint configuration
+The application focuses on one thing:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+> **Planning your week efficiently.**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+wPlanner is built as a responsive React application and packaged for Android using Capacitor, allowing the same codebase to support both Web and Android.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+The current version is designed around the planning period:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**1 October 2026 – 31 March 2027**
+**Winter Semester 2026/27**
 
-```
+---
 
+## Features
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Weekly Calendar
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Monday–Sunday weekly calendar
+- 24-hour timeline
+- 15-minute scheduling intervals
+- Previous / Today / Next week navigation
+- Sticky day and time headers
+- Responsive horizontal scrolling on mobile
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Task Management
 
-```
+- Create tasks directly from a calendar slot
+- Edit existing tasks
+- Delete tasks
+- Add descriptions
+- Assign task categories
+- Select start and end times
 
-sdafas
+### Task Categories
+
+wPlanner currently supports:
+
+- University
+- Study
+- Work
+- Personal
+- Exercise
+- Appointment
+- Other
+
+Each category has its own visual style for faster schedule recognition.
+
+### Recurring Tasks
+
+Create tasks that repeat:
+
+- Daily
+- Weekly
+
+Recurring events can be managed either as:
+
+- One individual occurrence
+- The entire recurring series
+
+### Schedule Conflict Detection
+
+wPlanner automatically detects overlapping tasks.
+
+Example:
+
+```text
+University Lecture
+10:00 – 12:00
+
+Machine Learning Study
+11:00 – 13:00
