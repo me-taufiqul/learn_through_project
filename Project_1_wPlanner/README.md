@@ -23,7 +23,7 @@ wPlanner is built as a responsive React application and packaged for Android usi
 The current version is designed around the planning period:
 
 **1 October 2026 – 31 March 2027**
-**Winter Semester 2026/27**
+**[Winter Semester 2026/27]**
 
 ---
 
