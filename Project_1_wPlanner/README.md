@@ -1,11 +1,11 @@
 # wPlanner
 
 <p align="center">
-  <strong>A simple, local-first weekly planner for Web and Android.</strong>
+  <strong>A simple, locally run weekly planner for Web and Android.</strong>
 </p>
 
 <p align="center">
-  Plan your week in 15-minute intervals, manage recurring tasks, detect schedule conflicts, and decide what takes priority.
+  Plan your week, manage recurring tasks, detect schedule conflicts, and decide what takes priority.
 </p>
 
 ---
