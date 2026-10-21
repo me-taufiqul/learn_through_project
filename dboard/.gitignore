@@ -1,0 +1,38 @@
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Editors
+.vscode/
+.idea/
+
+# Local data and private settings
+data.json
+settings.json
+.env
+.env.*
+
+# Development and backups
+backup*/
+backups/
+*.bak
+*.backup
+step*_upgrade.py
+fix_task_edit.py
+prepare_dboard.py
+release_workboard.py
+
+# Build and temporary files
+build/
+dist/
+*.log
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db

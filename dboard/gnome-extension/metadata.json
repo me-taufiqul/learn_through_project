@@ -1,0 +1,9 @@
+{
+  "uuid": "dboard@local",
+  "name": "dboard",
+  "description": "Minimalist Python-powered Ubuntu desktop productivity widget",
+  "shell-version": [
+    "50"
+  ],
+  "version": 1
+}

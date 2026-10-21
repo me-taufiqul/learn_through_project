@@ -1,0 +1,252 @@
+
+/* dboard — macOS-inspired minimalist theme */
+
+.wb-root {
+    padding: 16px;
+    border-radius: 22px;
+    border: 1px solid rgba(180, 190, 205, 0.38);
+    box-shadow: 0 12px 32px rgba(20, 30, 50, 0.16);
+}
+
+.wb-header {
+    spacing: 10px;
+    padding-bottom: 14px;
+}
+
+.wb-brand {
+    spacing: 10px;
+}
+
+.wb-brand-badge {
+    padding: 10px;
+    border-radius: 13px;
+    background-color: rgba(52, 120, 216, 0.12);
+}
+
+.wb-brand-icon {
+    color: #3478d8;
+}
+
+.wb-brand-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.wb-brand-subtitle {
+    font-size: 10px;
+    color: #8490a0;
+    padding-top: 3px;
+}
+
+.wb-dark .wb-brand-title {
+    color: #f7f9ff;
+}
+
+.wb-scroll {
+    padding: 0;
+}
+
+.wb-body {
+    spacing: 9px;
+}
+
+.wb-card {
+    padding: 12px;
+    spacing: 9px;
+    border-radius: 15px;
+    background-color: rgba(130, 145, 170, 0.065);
+}
+
+.wb-dark .wb-card {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+.wb-section-header {
+    spacing: 8px;
+    padding-bottom: 3px;
+}
+
+.wb-section-icon {
+    color: #3478d8;
+}
+
+.wb-section-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #29394c;
+}
+
+.wb-dark .wb-section-title {
+    color: #edf3ff;
+}
+
+.wb-count {
+    font-size: 10px;
+    color: #8793a4;
+}
+
+.wb-row {
+    spacing: 7px;
+}
+
+.wb-text {
+    color: #344357;
+}
+
+.wb-dark .wb-text {
+    color: #e9edf6;
+}
+
+.wb-muted {
+    color: #8490a0;
+}
+
+.wb-completed {
+    color: #95a0af;
+    text-decoration: line-through;
+}
+
+.wb-date {
+    font-size: 10px;
+    color: #3478d8;
+    background-color: rgba(52, 120, 216, 0.09);
+    border-radius: 7px;
+    padding: 5px 7px;
+}
+
+.wb-button {
+    padding: 6px 10px;
+    border-radius: 9px;
+    background-color: rgba(120, 140, 165, 0.10);
+    color: #536478;
+}
+
+.wb-button:hover {
+    background-color: rgba(52, 120, 216, 0.15);
+    color: #3478d8;
+}
+
+.wb-icon-button {
+    padding: 7px;
+    border-radius: 9px;
+    background-color: rgba(120, 140, 165, 0.10);
+    color: #64748b;
+}
+
+.wb-icon-button:hover {
+    background-color: rgba(52, 120, 216, 0.15);
+    color: #3478d8;
+}
+
+.wb-add {
+    background-color: rgba(52, 120, 216, 0.12);
+    color: #3478d8;
+}
+
+.wb-remove {
+    background-color: transparent;
+    color: #a2aab7;
+}
+
+.wb-remove:hover {
+    color: #e05c67;
+    background-color: rgba(224, 92, 103, 0.10);
+}
+
+.wb-input {
+    padding: 9px 11px;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 165, 185, 0.25);
+    background-color: rgba(255, 255, 255, 0.54);
+    color: #29394c;
+}
+
+.wb-input:focus {
+    border: 1px solid rgba(52, 120, 216, 0.70);
+}
+
+.wb-dark .wb-input {
+    background-color: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
+}
+
+.wb-checkbox {
+    border: 1px solid #a8b7ca;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.55);
+    padding: 3px;
+}
+
+.wb-checkbox.wb-checked {
+    background-color: #3478d8;
+    border-color: #3478d8;
+    color: #ffffff;
+}
+
+.wb-progress-track {
+    height: 6px;
+    background-color: rgba(125, 145, 170, 0.20);
+    border-radius: 6px;
+}
+
+.wb-progress-bar {
+    height: 6px;
+    background-color: #3478d8;
+    border-radius: 6px;
+}
+
+.wb-dark .wb-button,
+.wb-dark .wb-icon-button {
+    color: #e8efff;
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+.wb-dark .wb-date {
+    color: #a2c9ff;
+}
+
+
+/* Step 8: Improved spacing and deadlines */
+
+.wb-toolbar {
+    padding-bottom: 16px;
+}
+
+.wb-date.wb-overdue {
+    color: #c43c51;
+    background-color: rgba(235, 75, 90, 0.15);
+    font-weight: bold;
+}
+
+.wb-date.wb-today {
+    color: #bc5830;
+    background-color: rgba(255, 160, 80, 0.18);
+    font-weight: bold;
+}
+
+.wb-date.wb-soon {
+    color: #aa751c;
+    background-color: rgba(245, 185, 65, 0.16);
+}
+
+.wb-today-event {
+    color: #3478d8;
+    font-weight: bold;
+}
+
+.wb-dark .wb-date.wb-overdue {
+    color: #ff9ca8;
+}
+
+.wb-dark .wb-date.wb-today {
+    color: #ffc08f;
+}
+
+.wb-dark .wb-date.wb-soon {
+    color: #fbd58b;
+}
+
+.wb-dark .wb-today-event {
+    color: #93c5fd;
+}
