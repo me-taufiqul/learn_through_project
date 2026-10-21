@@ -34,4 +34,3 @@
 - GNOME Shell internals may change in future versions
 - No cloud synchronization
 - No desktop deadline notifications
-```

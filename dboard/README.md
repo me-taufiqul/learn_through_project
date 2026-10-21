@@ -1,271 +1,263 @@
+# dboard — Your desktop, organized
 
-# WorkBoard — Your Desktop, Organized
+**A minimalist, Python-powered productivity widget for Ubuntu GNOME.**
 
-### A minimalist, Python-powered productivity widget for Ubuntu GNOME.
+Keep tasks, deadlines, project progress, a weekly schedule, and quick notes directly on your desktop. No extra app window, account, or cloud service required.
 
-Keep your tasks, deadlines, projects, weekly schedule, and important notes
-accessible directly on your desktop — without opening another application.
+**Release:** `v1.0.0` · **Platform tested:** Ubuntu 26.04 / GNOME Shell 50 / Wayland · **Stack:** Python 3, GJS, JavaScript, CSS
 
-**Lightweight · Customizable · Local-first · No subscription**
+![dboard on an Ubuntu GNOME desktop](assets/screenshots/dboard-desktop.png)
 
-![WorkBoard desktop preview](assets/screenshots/workboard-desktop.png)
+> **Note:** dboard is a GNOME Shell extension backed by Python, not a standalone executable. It is developed and tested for a GNOME 50 Wayland session. Other versions are not yet verified.
 
----
+## Why dboard?
 
-## Overview
-
-WorkBoard is a desktop productivity widget designed for Ubuntu GNOME.
-
-It combines a Python backend with a GNOME Shell interface, providing
-a simple way to organize academic work, personal projects, and daily tasks.
-
-The widget sits on the desktop background, remains accessible when
-viewing the desktop, and restores saved information after login.
+dboard turns your desktop into a simple productivity space. When you return to your desktop, you can see what needs attention and update it there, instead of opening a separate to-do application. The interface features rounded translucent panels, symbolic icons, and compact or expanded views.
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| Daily tasks | Create, edit, complete, and remove tasks |
-| Deadline tracking | Countdown badges and overdue highlighting |
-| Project progress | Track completion with visual progress bars |
-| Weekly schedule | Organize recurring activities |
-| Important notes | Save and update reminders |
-| Compact mode | Hide editing fields for a cleaner display |
-| Collapsible sections | Expand or collapse individual sections |
-| Customization | Width, position, opacity, font size, and theme |
-| Persistent settings | Restore layout preferences after login |
-| Desktop integration | GNOME Shell and DING compatibility workaround |
+| Area | What you can do |
+| --- | --- |
+| **Daily tasks** | Add tasks, rename them with the pencil icon, check them off, or delete them. |
+| **Deadlines** | Add or remove dated reminders; see days remaining, due-today, and overdue indicators. |
+| **Project progress** | Add projects and change completion in 10-percentage-point increments, from 0% to 100%. |
+| **Weekly schedule** | Add or remove recurring day/time/activity entries; today's entries are highlighted. |
+| **Important note** | Save and replace a quick reminder. |
+| **Layout controls** | Expand or collapse individual sections, expand/collapse all, and switch between Compact and Full modes. |
+| **Appearance** | Switch between light and dark themes; adjust widget width, font size, opacity, vertical offset, and left/right placement. |
+| **Persistence** | Tasks, notes, progress, and layout preferences are stored locally and restored at login. |
 
-## Technology Stack
+**Compact vs. Full:** Compact mode hides the add/edit input rows to reduce clutter. Select **Full** to display the fields for new tasks, deadlines, projects, schedule items, and notes. Existing tasks can be renamed using the pencil icon.
 
-| Layer | Technology |
-|---|---|
-| Backend | Python 3 |
-| Desktop interface | GNOME Shell / GJS |
-| Frontend logic | JavaScript |
-| Interface styling | CSS |
-| Persistent data | JSON |
-| Development platform | Ubuntu Linux |
+## Screenshots
 
-### Architecture
+The image above shows dboard integrated into Ubuntu's desktop. The panels can be collapsed individually so that only the information you need stays visible.
 
-```text
-             Ubuntu GNOME Desktop
-                      |
-                      v
-              GNOME Shell / GJS
-                      |
-              Interactive Widget
-                      |
-                      v
-                Python Backend
-                      |
-                      v
-                Local JSON File
-```
+## Requirements and compatibility
 
-GNOME Shell handles the graphical interface and desktop positioning.
+- **Ubuntu 26.04**, with **GNOME Shell 50** and a **Wayland** session (tested development environment).
+- **Python 3**, available as `python3`.
+- **GNOME Shell extensions CLI**, available as `gnome-extensions`.
+- **Git** to clone the repository (or download the repository source from GitHub).
 
-Python manages tasks, projects, deadlines, schedules, notes, and settings.
+No `pip` packages, Python virtual environment, root access, or external database are required for the application itself.
+
+> **Compatibility note:** dboard uses an experimental GNOME window-stacking workaround to remain interactive alongside Desktop Icons NG (DING). GNOME updates and alternative desktop environments may require changes.
 
 ## Installation
 
-### Requirements
+### 1. Clone the parent repository
 
-- Ubuntu 26.04 with GNOME Shell 50
-- GNOME Wayland session
-- Python 3
-- Git
-
-This is the tested development environment. Other GNOME versions
-have not yet been verified.
-
-### 1. Clone the repository
+This project is located **inside** [`learn_through_project`](https://github.com/me-taufiqul/learn_through_project), not in a standalone `dboard` repository.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/dboard.git
-cd dboard
+git clone https://github.com/me-taufiqul/learn_through_project.git
+cd learn_through_project/dboard
 ```
 
-### 2. Install WorkBoard
+If you already cloned the parent repository, open its `dboard/` directory instead.
+
+### 2. Install
 
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-No Python virtual environment or additional pip packages are required.
+The installer copies the Python backend and extension files into your user-local directories. It preserves existing dboard data. If you previously used the older WorkBoard version and no dboard data file exists, the installer also copies its saved data into dboard's new location.
 
-### 3. Activate
+### 3. Activate on Wayland
 
-Log out of Ubuntu and log back in.
-
-Then run:
+**Log out of Ubuntu and log back in** so GNOME recognizes the installed extension, then run:
 
 ```bash
-gnome-extensions enable workboard@local
+gnome-extensions enable dboard@local
+gnome-extensions info dboard@local
 ```
 
-Open the desktop using Super + D.
+Open your desktop (for example, with **Super + D**) to use dboard.
 
-### 4. Verify
+If you previously installed the experimental predecessor and see two widgets, you can disable the old extension:
 
 ```bash
-gnome-extensions info workboard@local
+gnome-extensions disable workboard@local
 ```
 
-The extension should report that it is enabled.
+This only disables the old extension; it does not remove its saved data.
 
-## How to Use
+## How to use dboard
 
-### Daily Tasks
+### Daily tasks
 
-Switch to Full mode to reveal the task input.
-
-Create a task using the input field. Use the checkbox to mark it
-complete, the pencil icon to change its name, and the delete button
-to remove it.
+In **Full** mode, type a task into **Add a task…** and press **Enter** or the add button. Use the checkbox to mark it complete, the pencil button to rename it, and **×** to remove it. The heading displays a completed/total count.
 
 ### Deadlines
 
-Enter deadlines in this format:
+Add a date and description separated by `|`:
 
 ```text
 2026-11-15 | Submit assignment
 ```
 
-The widget displays a countdown and highlights urgent or overdue dates.
+Deadlines are sorted by date. Badges show the remaining number of days, indicate deadlines due today, and highlight overdue items. The countdown updates when you refresh dboard; it is **not** a background notification service.
 
-### Project Progress
+### Project progress
 
-Add a project and adjust its progress using the plus and minus controls.
+Add a project, then use **−** and **+** to adjust its progress in **10% steps**. A progress bar reflects the value. Project names can currently be added or removed, but not renamed inline.
 
-### Weekly Schedule
+### Weekly schedule
 
-Add an event using:
+Enter an activity in this format:
 
 ```text
 Monday | 09:00-11:00 | Study Python
 ```
 
-Activities scheduled for the current day receive visual emphasis.
+The current day's entries receive visual emphasis. This is a manual weekly list, not a calendar synchronization feature.
 
-### Important Notes
+### Important note
 
-Use the note field to store a reminder or short piece of information.
+Type or replace the note in **Full** mode and save it with the add button or **Enter**. dboard stores one note field.
 
-### Appearance
+### Layout and personalization
 
-Open the settings icon to customize:
+Use the top controls to switch between **Compact** and **Full**, open the settings panel, or refresh the display. Click section headers to collapse or expand them, or use **Collapse All / Expand All**.
 
-- Widget width
-- Font size
-- Transparency
-- Top offset
-- Left or right placement
-- Light or dark theme
+The settings panel lets you adjust theme, width, font size, opacity, vertical offset, and side of the screen. Layout choices are saved in the local JSON file and restored when dboard starts again.
 
-Use Compact mode and collapsible sections to control visual clutter.
-
-## Privacy and Local Storage
-
-WorkBoard does not require a user account or cloud service.
-
-Application data is stored locally:
+## How it works
 
 ```text
-~/.local/share/workboard-widget/data.json
+Ubuntu GNOME Shell
+       │
+       ▼
+GNOME extension (GJS / JavaScript + CSS)
+       │  asynchronous subprocess calls
+       ▼
+Python backend (backend.py)
+       │
+       ▼
+Local JSON data (data.json)
 ```
 
-Your tasks, schedules, and notes are not included in this repository.
+The GNOME extension renders the desktop interface and sends commands to the Python backend. The backend validates operations and writes data to a local JSON file using an atomic replacement approach.
 
-## Project Structure
+### Project structure
 
 ```text
-dboard/
-├── assets/
-│   └── screenshots/
-│       └── workboard-desktop.png
-├── gnome-extension/
-│   ├── extension.js
-│   ├── metadata.json
-│   └── stylesheet.css
-├── backend.py
-├── install.sh
-├── uninstall.sh
-├── README.md
-├── CHANGELOG.md
-├── LICENSE
-├── VERSION
-└── .gitignore
+learn_through_project/
+├── wPlanner/                   # Another project in the collection
+└── dboard/
+    ├── assets/
+    │   └── screenshots/
+    │       └── dboard-desktop.png
+    ├── gnome-extension/
+    │   ├── extension.js         # Desktop UI and interactions
+    │   ├── metadata.json        # GNOME extension identifier/version
+    │   └── stylesheet.css       # Appearance and layout
+    ├── backend.py               # Python data-management commands
+    ├── install.sh               # User-local installer
+    ├── uninstall.sh             # Removes installed code, retains data
+    ├── README.md
+    ├── CHANGELOG.md
+    ├── LICENSE
+    ├── VERSION
+    └── .gitignore
 ```
+
+## Data, privacy, and backups
+
+Personal information is stored on **your device**:
+
+```text
+~/.local/share/dboard/data.json
+```
+
+Installed code lives at:
+
+```text
+~/.local/share/dboard/backend.py
+~/.local/share/gnome-shell/extensions/dboard@local/
+```
+
+The installer preserves existing data and backs up previously installed application code when applicable. It does **not** automatically synchronize information with any cloud service.
+
+You can back up your information manually:
+
+```bash
+cp ~/.local/share/dboard/data.json ~/dboard-data-backup.json
+```
+
+Keep this backup private; it may contain tasks, notes, and schedules.
+
+## Updating
+
+From the **parent repository**:
+
+```bash
+cd learn_through_project
+git pull --ff-only
+cd dboard
+./install.sh
+```
+
+Then log out and back in to reload the GNOME extension on Wayland. Your existing `data.json` is preserved.
 
 ## Uninstallation
 
-Run:
+From the `dboard/` source directory:
 
 ```bash
 ./uninstall.sh
 ```
 
-The widget code is removed, but personal data and backups are preserved.
+This disables and removes the installed extension and Python backend, while **keeping your personal data and backups**. Log out and back in to finish unloading the extension.
 
 ## Troubleshooting
 
-### Extension does not appear
-
-Check:
+**The extension does not appear:**
 
 ```bash
-gnome-extensions info workboard@local
+gnome-extensions list
+gnome-extensions info dboard@local
 ```
 
-Log out and back in after installing or updating the GNOME extension.
+Confirm you have logged out and back in after installation and that the extension is enabled.
 
-### Check GNOME logs
+**The Python backend does not respond:**
 
 ```bash
-journalctl --user -b -o cat | grep -i workboard | tail -30
+python3 ~/.local/share/dboard/backend.py get
 ```
 
-### Desktop icons interfere with clicking
+**Inspect GNOME errors:**
 
-WorkBoard includes an experimental GNOME window-stacking workaround
-for Desktop Icons NG (DING).
+```bash
+journalctl --user -b -o cat | grep -i -E 'dboard|gnome-shell' | tail -40
+```
 
-This behavior may need adjustments after future GNOME updates.
+**Desktop icons block interaction:** dboard includes an experimental workaround for the DING desktop-icons layer, but stacking behavior can vary with GNOME versions and other extensions.
 
-## Known Limitations
+## Known limitations
 
-- GNOME Shell compatibility is version-dependent.
-- Deadline countdowns update when the widget refreshes.
-- Compact mode hides add/edit input fields.
-- Not every type of entry supports inline editing yet.
-- No cloud synchronization or calendar integration.
-- GNOME extension updates require a session reload on Wayland.
+- Tested on Ubuntu 26.04 / GNOME Shell 50 / Wayland; other environments are not verified.
+- Uses GNOME Shell internals for desktop layering; future GNOME updates may affect compatibility.
+- Deadlines refresh when the widget reloads; there are no scheduled notifications.
+- Project names, deadline entries, and weekly events do not currently have inline rename/edit controls; remove and re-add to change them.
+- No cloud sync, mobile app, or Google Calendar integration.
 
 ## Roadmap
 
-Possible improvements for future releases:
-
-- Desktop notifications
-- Task prioritization
-- Calendar integration
-- Drag-and-drop organization
-- Additional themes
-- More flexible scheduling
+Possible future enhancements: task priorities, reminders, richer entry editing, calendar integration, drag-and-drop ordering, and additional themes.
 
 ## Contributing
 
-Suggestions, bug reports, and pull requests are welcome.
+Questions, suggestions, and bug reports are welcome via the [parent repository's Issues page](https://github.com/me-taufiqul/learn_through_project/issues). Open a pull request to contribute changes to the `dboard/` folder.
 
 ## License
 
-Licensed under the MIT License. See [LICENSE](LICENSE).
+Released under the [MIT License](LICENSE). See the license file for the copyright and permission terms.
 
 ---
 
-**WorkBoard v1.0.0**
-
-Built with Python, JavaScript, and GNOME Shell.
+**dboard v1.0.0** · Part of [learn_through_project](https://github.com/me-taufiqul/learn_through_project) · Built with Python, GNOME Shell, JavaScript, and CSS.
