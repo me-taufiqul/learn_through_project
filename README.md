@@ -5,7 +5,7 @@ A collection of practical software development projects
 built through hands-on learning.
 
 Projects explore Python, web development, Linux,
-automation, and application development.
+automation, and android application development.
 
 ## Projects
 
