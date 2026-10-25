@@ -83,7 +83,4 @@ Example:
 University Lecture
 10:00 – 12:00
 
-Machine Learning Study
-11:00 – 13:00
-
 
